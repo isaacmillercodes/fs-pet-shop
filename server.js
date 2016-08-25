@@ -1,38 +1,26 @@
 //'use strict';
 
-var http = require('http');
-var port = 8000;
-var fs = require('fs');
+var express = require('express');
+var app = express();
+var pets = require('./pets.json')
 
-http.createServer(function(req, res) {
+app.listen(3000, function () {
+  console.log('Listening...');
+});
 
-  fs.readFile('pets.json', 'utf8', function(err, data) {
+app.get('/pets', function (req, res, next) {
+  res.contentType('application/json')
+  res.send(JSON.stringify(pets));
 
-    data = JSON.parse(data);
+});
 
-    if (req.url === '/pets') {
-
-        console.log(data);
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
-        res.end(JSON.stringify(data));
-
-    } else if (req.url === '/pets/0') {
-
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
-        res.end(JSON.stringify(data[0]));
-
-    } else if (req.url === '/pets/1') {
-
-        res.setHeader('Content-Type', 'application/json');
-        res.statusCode = 200;
-        res.end(JSON.stringify(data[1]));
-    }
-    else {
-      res.statusCode = 404;
-      res.setHeader('Content-Type', 'text/plain');
-      res.end('Not found');
-    }
-  });
-}).listen(port);
+app.get('/pets/:id', function (req, res, next) {
+  console.log(req.params);
+  if (req.params.id >= 0 && req.params.id < pets.length) {
+    res.contentType('application/json')
+    res.send(pets[req.params.id])
+  } else {
+    res.contentType('text/plain')
+    res.status(404).send('Not found');
+  }
+})
